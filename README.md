@@ -10,7 +10,7 @@ Column height represents the relative level of traffic generated for a specific 
 * To install the UnicornHat library, please check the [pimoroni github page](https://github.com/pimoroni/unicorn-hat) 
 
 ### Usage
-**`dns_stats.py [-h] [-c {traffic, ads, alternate}] [-r] [-a ADDRESS]`**  
+**`sudo dns_stats.py [-h] [-c {traffic, ads, alternate}] [-r] [-a ADDRESS]`**  
 
 #### Options  
 `-h, --help`  
