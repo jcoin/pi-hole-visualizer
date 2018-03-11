@@ -1,1 +1,2 @@
-sense_hat==2.2.0
+unicornhat==2.2.3
+rpi-ws281x==3.0.6
