@@ -1,5 +1,5 @@
-# Pi-hole Visualizer  
-Pi-hole Visualizer is a Python script used to display DNS traffic in a colorful and informative way on the Sense-HAT. It depends on the Pi-hole ecosystem and specifically the FTL daemon to retrieve statistics about DNS queries and ads blocked on the local network.  
+# Pi-hole Visualizer  - UnicornHat Version
+Pi-hole Visualizer is a Python script used to display DNS traffic in a colorful and informative way on the Unicorn-HAT. It depends on the Pi-hole ecosystem and specifically the FTL daemon to retrieve statistics about DNS queries and ads blocked on the local network.  
 
 Column height represents the relative level of traffic generated for a specific hourly interval in the previous 24-hour timeframe. Color is used to represent either the aforementioned traffic level or the relative percentage of ads blocked. Pi-hole visualizer can also alternate between the color coding systems at regular intervals. If you desire a more 'aesthetic' experience try the ripple option. The program is either manually run from the command line or enabled as a systemd service to run automatically at boot.  
 
@@ -7,7 +7,7 @@ Column height represents the relative level of traffic generated for a specific 
 
 ### Requirements
 * To install Pi-hole, run `curl -sSL https://install.pi-hole.net | bash`
-* The Sense-HAT package can be installed with `sudo apt-get install sense-hat`  
+* To install the UnicornHat library, please check the [pimoroni github page](https://github.com/pimoroni/unicorn-hat) 
 
 ### Usage
 **`dns_stats.py [-h] [-c {traffic, ads, alternate}] [-r] [-a ADDRESS]`**  
@@ -25,7 +25,7 @@ Generates a ripple effect when producing the chart
 `-a ADDRESS, --address ADDRESS`  
 Specify address of dns server, defaults to localhost
 
- ### To Install As a System Service  
+ ### To Install As a System Service  -- Not yet tested
  1. Make the script and unit file executable:  
  `sudo chmod +x dns_stats.py`  
  `sudo chmod +x dns_stats.service`  
