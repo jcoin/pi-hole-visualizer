@@ -10,7 +10,8 @@ Column height represents the relative level of traffic generated for a specific 
 * To install the UnicornHat library, please check the [pimoroni github page](https://github.com/pimoroni/unicorn-hat) 
 
 ### Usage
-**`sudo dns_stats.py [-h] [-c {traffic, ads, alternate}] [-r] [-a ADDRESS]`**  
+**`sudo dns_stats.py [-h] [-c {traffic, ads, alternate}] [-r] [-a ADDRESS] [-o {0, 90, 180, 270}] [-ll]`**  
+
 
 #### Options  
 `-h, --help`  
@@ -25,7 +26,14 @@ Generates a ripple effect when producing the chart
 `-a ADDRESS, --address ADDRESS`  
 Specify address of dns server, defaults to localhost
 
+`-o {0, 90, 180, 270}, --orientation {0, 90, 180, 270}`  
+Specify orientation of display so that RPi may be installed in non-default orientation
+
+`-ll, --lowlight`  
+Lower LED matrix brightness for use in low light environments.
+
  ### To Install As a System Service  -- Not yet tested
+
  1. Make the script and unit file executable:  
  `sudo chmod +x dns_stats.py`  
  `sudo chmod +x dns_stats.service`  
