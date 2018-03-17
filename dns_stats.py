@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 '''
-Pi-hole DNS traffic visualizer for the Raspberry Pi Sense HAT
-By Sam Lindley, 2/21/2018
+Pi-hole DNS traffic visualizer for the Raspberry Pi Unicron Hat
+Original code By Sam Lindley, 2/21/2018
+Modified by jcoin 
 '''
 
 import argparse
@@ -11,7 +12,6 @@ import logging
 import sys
 import time
 import urllib.request
-#from sense_hat import SenseHat
 import unicornhat as unicorn
 
 
@@ -54,43 +54,32 @@ def dns_request(address):
             print("Error: Invalid address for DNS server. Try again.")
             sys.exit(1)
 
-    #sort and reverse data so that latest time intervals appear first in list
-    try:
-        for key in sorted(data['domains_over_time'].keys(), reverse=True):
-            #aggregate data into hourly intervals
-            if key_count > 0 and key_count % 6 == 0:
-                domain_info_hourly.append([domains, (ads / domains) * 100 if domains > 0 else 0])
-                domains = 0
-                ads = 0
-            domains += data['domains_over_time'][key]
-            ads += data['ads_over_time'][key]
-            key_count += 1
-    except KeyError:
+    if 'domains_over_time' not in data or 'ads_over_time' not in data:
         logger.error('Invalid data returned from server. Ensure pihole-FTL service is running.')
         print('Error: Invalid data returned from server. Ensure pihole-FTL service is running.')
         sys.exit(1)
 
     logger.info('Successful connection with server.')
+
   #  print('Successful connection with server')
-  
+
+    #sort and reverse data so that latest time intervals appear first in list
+    for key in sorted(data['domains_over_time'].keys(), reverse=True):
+        #aggregate data into hourly intervals
+        if key_count > 0 and key_count % 6 == 0:
+            domain_info_hourly.append([domains, (ads / domains) * 100 if domains > 0 else 0])
+            domains = 0
+            ads = 0
+        domains += data['domains_over_time'][key]
+        ads += data['ads_over_time'][key]
+        key_count += 1
+    
+
     #extract a slice of the previous 24 hours
     domain_info_hourly = domain_info_hourly[:24]
 
     return domain_info_hourly
 
-#color code hourly interval
-def color_dict(level):
-    return {
-        0 : (0, 0, 255),
-        1 : (0, 128, 255),
-        2 : (0, 255, 255),
-        3 : (255, 128, 0),
-        4 : (0, 255, 0),
-        5 : (128, 255, 0),
-        6 : (255, 255, 0),
-        7 : (255, 128, 0),
-        8 : (255, 0, 0),
-    }[level]
 
 def color_dict_pix(level,color_id):
     return {
@@ -106,13 +95,17 @@ def color_dict_pix(level,color_id):
     }[level][color_id]
 	
 	
-def unicorn_init():
+def unicorn_init(orientation,lowlight):
     unicorn.set_layout(unicorn.AUTO)
-    unicorn.rotation(0)
-    unicorn.brightness(0.5)
+    unicorn.rotation(orientation)
+    if lowlight: 
+       unicorn.brightness(0.3)
+    else :
+       unicorn.brightness(0.5)
     width,height=unicorn.get_shape()
 	
-def generate_chart(data, color, ripple):
+
+def generate_chart(data, color, ripple, orientation, lowlight):
     info_chart = []
     domain_min = data[0][0]
     domain_max = data[0][0]
@@ -139,33 +132,35 @@ def generate_chart(data, color, ripple):
         info_chart.append([int((hour[0] - domain_min) / domain_interval) if domain_interval > 0 \
                            else 0, int((hour[1] - ad_min) / ad_interval) if ad_interval > 0 else 0])
     info_chart = list(reversed(info_chart[:8]))
-    #sense = SenseHat()
-    #sense.clear()
-	
-    unicorn_init()
-	
-	
+
+    unicorn_init(orientation,lowlight)
+
+
+
+
     #set pixel values on rgb display
     for col in range(0, 8):
         if info_chart[col][0] > 0:
             for row in range(0, info_chart[col][0]):
                 #if color not set, default to red for all values
                 if color == 'traffic':
+
                     #sense.set_pixel(row, col, color_dict(info_chart[col][0]))
                     
-                    unicorn.set_pixel(row, col, color_dict_pix(info_chart[col][0],0),color_dict_pix(info_chart[col][0],1),color_dict_pix(info_chart[col][0],2))
+                    unicorn.set_pixel(row, 7-col, color_dict_pix(info_chart[col][0],0),color_dict_pix(info_chart[col][0],1),color_dict_pix(info_chart[col][0],2))
                     
                     if ripple:
                         time.sleep(0.01)
                 elif color == 'ads':
                     #sense.set_pixel(row, col, color_dict(info_chart[col][1]))
-                    unicorn.set_pixel(row, col, color_dict_pix(info_chart[col][1],0),color_dict_pix(info_chart[col][1],1),color_dict_pix(info_chart[col][1],2))
+                    unicorn.set_pixel(row, 7-col, color_dict_pix(info_chart[col][1],0),color_dict_pix(info_chart[col][1],1),color_dict_pix(info_chart[col][1],2))
                    
                     if ripple:
                         time.sleep(0.01)
                 else:
                     #sense.set_pixel(row, col, (255, 0, 0))
-                    unicorn.set_pixel(row, col, 255, 0, 0)
+                    unicorn.set_pixel(row,7-col, 255, 0, 0)
+
                     if ripple:
                         time.sleep(0.01)
     unicorn.show()
@@ -180,6 +175,10 @@ def main():
                         ripple effect when producing the chart")
     parser.add_argument('-a', '--address', action="store", default='127.0.0.1', help="specify \
                         address of DNS server, defaults to localhost")
+    parser.add_argument('-o', '--orientation', action="store", choices=[0, 90, 180, 270], \
+                        type=int, default='0', help="rotate graph to match orientation of RPi")
+    parser.add_argument('-ll', '--lowlight', action="store_true", help="set LED matrix to \
+                        light mode for use in dark environments")
     args = parser.parse_args()
 
     if args.color == 'alternate':
@@ -192,10 +191,10 @@ def main():
         if args.color == 'alternate':
             for i in range(0, 15):
                 color = 'ads' if color == 'traffic' else 'traffic'
-                generate_chart(domain_info_hourly, color, args.ripple)
+                generate_chart(domain_info_hourly, color, args.ripple, args.orientation, args.lowlight)
                 time.sleep(2)
         else:
-            generate_chart(domain_info_hourly, color, args.ripple)
+            generate_chart(domain_info_hourly, color, args.ripple, args.orientation, args.lowlight)
             time.sleep(30)
 
 if __name__ == '__main__':
