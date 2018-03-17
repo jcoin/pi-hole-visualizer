@@ -99,9 +99,9 @@ def unicorn_init(orientation,lowlight):
     unicorn.set_layout(unicorn.AUTO)
     unicorn.rotation(orientation)
     if lowlight: 
+       unicorn.brightness(0.3)
+    else :
        unicorn.brightness(0.5)
-	else :
-	   unicorn.brightness(0.2)
     width,height=unicorn.get_shape()
 	
 
