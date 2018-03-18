@@ -156,7 +156,7 @@ def generate_chart(clean_data, color, ripple, orientation, lowlight):
         info_chart.append([int((i[0] - domain_min) / domain_interval) if domain_interval > 0 \
                            else 0, int((i[1] - ad_min) / ad_interval) if ad_interval > 0 else 0])
     info_chart = list(reversed(info_chart[:8]))
-
+        
     #set pixel values on rgb display
     for col in range(0, 8):
         if info_chart[col][0] > 0:
@@ -167,7 +167,6 @@ def generate_chart(clean_data, color, ripple, orientation, lowlight):
                         unicorn.set_pixel(row, 7-col, 0,0,0)
                         unicorn.show()
                         time.sleep(RIPPLE_SPEED)
-                        
                     unicorn.set_pixel(row, 7-col, color_dict_pix(info_chart[col][0],0),color_dict_pix(info_chart[col][0],1),color_dict_pix(info_chart[col][0],2))
                     
                 elif color == 'ads':
@@ -186,16 +185,22 @@ def generate_chart(clean_data, color, ripple, orientation, lowlight):
                         time.sleep(RIPPLE_SPEED)
                         
                     unicorn.set_pixel(row,7-col, 255, 0, 0)
-                        
+            for row in range(info_chart[col][0], 8):
+                unicorn.set_pixel(row, 7-col, 0,0,0)
+                if ripple:
+                   time.sleep(RIPPLE_SPEED)
+                   unicorn.show()
+            unicorn.show()       
         else:
-            for row in range(0,unicorn.get_shape()[1]):
+            for row in range(0,8):
                if not all(v is 0 for v in unicorn.get_pixel(row,7-col)):
                   if ripple:
                      unicorn.set_pixel(row, 7-col, 0,0,0)
                      unicorn.show()
                      time.sleep(RIPPLE_SPEED)
-                     
-    unicorn.show()
+               unicorn.set_pixel(row, 7-col, 0,0,0)
+                                       
+            unicorn.show()
 
 def main():
     parser = argparse.ArgumentParser(description="Generates a chart to display network traffic \
@@ -234,7 +239,7 @@ def main():
         clean_data = organize_data(raw_data, args.interval)
 
         if args.color == 'alternate':
-            for i in range(0, 15):
+            #for i in range(0, 15):
                 color = 'ads' if color == 'traffic' else 'traffic'
                 generate_chart(clean_data, color, args.ripple, args.orientation, args.lowlight)
                 time.sleep(2)
