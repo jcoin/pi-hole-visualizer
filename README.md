@@ -34,6 +34,9 @@ Specify orientation of display so that RPi may be installed in non-default orien
 `-ll, --lowlight`  
 Lower LED matrix brightness for use in low light environments.
 
+`-cl, --critlogs`  
+Record only critical logs (as there are not critical logs in the code, it deactivate logging).
+
  ### To Install As a System Service  -- Not yet tested
 
  1. Make the script and unit file executable:  

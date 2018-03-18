@@ -14,7 +14,7 @@ import time
 import urllib.request
 import unicornhat as unicorn
 
-
+RIPPLE_SPEED=0.05
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -46,7 +46,6 @@ def unicorn_init(orientation,lowlight):
        unicorn.brightness(0.3)
     else :
        unicorn.brightness(0.5)
-    width,height=unicorn.get_shape()
 
 
 
@@ -127,6 +126,7 @@ def organize_data(raw_data, interval):
     elif interval == 120:
         clean_data = clean_data[:12]
 
+
     return clean_data
 
 def generate_chart(clean_data, color, ripple, orientation, lowlight):
@@ -157,31 +157,44 @@ def generate_chart(clean_data, color, ripple, orientation, lowlight):
                            else 0, int((i[1] - ad_min) / ad_interval) if ad_interval > 0 else 0])
     info_chart = list(reversed(info_chart[:8]))
 
-    unicorn_init(orientation,lowlight)
-
     #set pixel values on rgb display
     for col in range(0, 8):
         if info_chart[col][0] > 0:
             for row in range(0, info_chart[col][0]):
                 #if color not set, default to red for all values
                 if color == 'traffic':
-
-                    #sense.set_pixel(row, col, color_dict(info_chart[col][0]))
-                    
+                    if ripple:
+                        unicorn.set_pixel(row, 7-col, 0,0,0)
+                        unicorn.show()
+                        time.sleep(RIPPLE_SPEED)
+                        
                     unicorn.set_pixel(row, 7-col, color_dict_pix(info_chart[col][0],0),color_dict_pix(info_chart[col][0],1),color_dict_pix(info_chart[col][0],2))
                     
-                    if ripple:
-                        time.sleep(0.01)
                 elif color == 'ads':
-                    #sense.set_pixel(row, col, color_dict(info_chart[col][1]))
+                    if ripple:
+                        unicorn.set_pixel(row, 7-col, 0,0,0)
+                        unicorn.show()
+                        time.sleep(RIPPLE_SPEED)
+                        
                     unicorn.set_pixel(row, 7-col, color_dict_pix(info_chart[col][1],0),color_dict_pix(info_chart[col][1],1),color_dict_pix(info_chart[col][1],2))
-                   
-                    if ripple:
-                        time.sleep(0.01)
+                    
+
                 elif color == 'basic':
-                    unicorn.set_pixel(row,7-col, 255, 0, 0)
                     if ripple:
-                        time.sleep(0.01)
+                        unicorn.set_pixel(row, 7-col, 0,0,0)
+                        unicorn.show()
+                        time.sleep(RIPPLE_SPEED)
+                        
+                    unicorn.set_pixel(row,7-col, 255, 0, 0)
+                        
+        else:
+            for row in range(0,unicorn.get_shape()[1]):
+               if not all(v is 0 for v in unicorn.get_pixel(row,7-col)):
+                  if ripple:
+                     unicorn.set_pixel(row, 7-col, 0,0,0)
+                     unicorn.show()
+                     time.sleep(RIPPLE_SPEED)
+                     
     unicorn.show()
 
 def main():
@@ -202,13 +215,19 @@ def main():
                         type=int, default='0', help="rotate graph to match orientation of RPi")
     parser.add_argument('-ll', '--lowlight', action="store_true", help="set LED matrix to \
                         light mode for use in dark environments")
-
+    parser.add_argument('-cl', '--critlogs', action="store_true", help="critical logs only")
+    
     args = parser.parse_args()
 
     if args.color == 'alternate':
         color = 'traffic'
     else:
         color = args.color
+
+    if args.critlogs :
+       logger.setLevel(logging.CRITICAL)
+
+    unicorn_init(args.orientation,args.lowlight)
 
     while True:
         raw_data = api_request(args.address)
