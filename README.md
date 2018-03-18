@@ -10,7 +10,7 @@ Column height represents the relative level of traffic generated for a specific 
 * To install the UnicornHat library, please check the [pimoroni github page](https://github.com/pimoroni/unicorn-hat) 
 
 ### Usage
-**`sudo dns_stats.py [-h] [-c {basic, traffic, ads, alternate}] [-r] [-a ADDRESS] [-o {0, 90, 180, 270}] [-ll]`**  
+**`sudo dns_stats.py [-h] [-c {basic, traffic, ads, alternate}] [-r] [-a ADDRESS] [-o {0, 90, 180, 270}] [-ll] [-cl]`**  
 
 #### Options  
 `-h, --help`  
@@ -56,3 +56,4 @@ Record only critical logs (as there are not critical logs in the code, it deacti
  
  6. To check the status of the service:  
  `sudo systemctl status dns_stats`
+
